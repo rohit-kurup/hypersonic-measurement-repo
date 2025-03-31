@@ -1,46 +1,53 @@
-// including the libraries needed for this program 
-#include "LSM6DS3.h" // library that is required to talk to the inbuilt IMU 
-#include "Wire.h" // contains tools for I2C comminication 
+#include "LSM6DS3.h"
+#include "Wire.h"
 
-// Use the built-in IMU with correct initialization
-LSM6DS3 imu(I2C_MODE, 0x6A);  // I2C address 0x6A for XIAO Sense
+LSM6DS3 imu(I2C_MODE, 0x6A);  // I2C address 0x6A
+
+void initIMU() {
+  // Initialize with default settings
+  if (imu.begin() != 0) {
+    Serial.println("IMU initialization failed!");
+    while(1);
+  }
+  
+  // Manually configure ranges via registers (advanced)
+  // Accelerometer: 16g range (CTRL1_XL = 0b10010100)
+  // 1001 = 16g, 0100 = 104Hz ODR
+  imu.writeRegister(LSM6DS3_ACC_GYRO_CTRL1_XL, 0x94);
+  
+  // Gyroscope: 2000dps range (CTRL2_G = 0b10011100)
+  // 1001 = 2000dps, 1100 = 104Hz ODR
+  imu.writeRegister(LSM6DS3_ACC_GYRO_CTRL2_G, 0x9C);
+  
+  Serial.println("IMU configured for:");
+  Serial.println("- Accelerometer: ±16g");
+  Serial.println("- Gyroscope: ±2000dps");
+  Serial.println("- Output rate: 104Hz");
+}
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial);  // Wait for serial connection
+  while(!Serial);
   
-  Serial.println("Initializing IMU...");
-  
-  if (imu.begin() != 0) {
-    Serial.println("IMU Error! Check:");
-    Serial.println("1. Board selected: XIAO nRF52840 Sense");
-    Serial.println("2. No other IMU libraries installed");
-    while(1);  // Halt if initialization fails
-  }
-  
+  initIMU();
   Serial.println("IMU Ready!");
-  Serial.println("Timestamp(ms),AccX,AccY,AccZ,GyroX,GyroY,GyroZ");
 }
 
 void loop() {
-  // Print timestamp
-  Serial.print(millis());
-  Serial.print(",");
-  
-  // Accelerometer data
+  // Read and print data
+  Serial.print("Accel: ");
   Serial.print(imu.readFloatAccelX());
-  Serial.print(",");
+  Serial.print(", ");
   Serial.print(imu.readFloatAccelY());
-  Serial.print(",");
+  Serial.print(", ");
   Serial.print(imu.readFloatAccelZ());
-  Serial.print(",");
   
-  // Gyroscope data
+  Serial.print(" | Gyro: ");
   Serial.print(imu.readFloatGyroX());
-  Serial.print(",");
+  Serial.print(", ");
   Serial.print(imu.readFloatGyroY());
-  Serial.print(",");
+  Serial.print(", ");
   Serial.println(imu.readFloatGyroZ());
   
-  delay(50);  // ~20Hz update rate
+  delay(50);  // ~20Hz output rate
 }
