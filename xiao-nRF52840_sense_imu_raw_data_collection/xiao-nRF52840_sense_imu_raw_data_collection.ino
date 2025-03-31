@@ -1,5 +1,6 @@
-#include "LSM6DS3.h"
-#include "Wire.h"
+// including the libraries needed for this program 
+#include "LSM6DS3.h" // library that is required to talk to the inbuilt IMU 
+#include "Wire.h" // contains tools for I2C comminication 
 
 // Use the built-in IMU with correct initialization
 LSM6DS3 imu(I2C_MODE, 0x6A);  // I2C address 0x6A for XIAO Sense
