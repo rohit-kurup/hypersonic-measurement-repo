@@ -26,7 +26,7 @@ void initIMU() {
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(2000000);
   while(!Serial);
   
   initIMU();
@@ -34,20 +34,35 @@ void setup() {
 }
 
 void loop() {
-  // Read and print data
-  Serial.print("Accel: ");
-  Serial.print(imu.readFloatAccelX());
-  Serial.print(", ");
-  Serial.print(imu.readFloatAccelY());
-  Serial.print(", ");
-  Serial.print(imu.readFloatAccelZ());
-  
-  Serial.print(" | Gyro: ");
-  Serial.print(imu.readFloatGyroX());
-  Serial.print(", ");
-  Serial.print(imu.readFloatGyroY());
-  Serial.print(", ");
-  Serial.println(imu.readFloatGyroZ());
-  
-  delay(50);  // ~20Hz output rate
+  static int sampleCount = 0;
+
+  // Read accelerometer and gyroscope data
+  imu.readFloatAccelX();
+  imu.readFloatAccelY();
+  imu.readFloatAccelZ();
+  imu.readFloatGyroX();
+  imu.readFloatGyroY();
+  imu.readFloatGyroZ();
+
+  // Print data at intervals (e.g., every 20 samples)
+  if (sampleCount % 20 == 0) {
+    Serial.print("Accel: ");
+    Serial.print(imu.readFloatAccelX());
+    Serial.print(", ");
+    Serial.print(imu.readFloatAccelY());
+    Serial.print(", ");
+    Serial.print(imu.readFloatAccelZ());
+    
+    Serial.print(" | Gyro: ");
+    Serial.print(imu.readFloatGyroX());
+    Serial.print(", ");
+    Serial.print(imu.readFloatGyroY());
+    Serial.print(", ");
+    Serial.println(imu.readFloatGyroZ());
+  }
+
+  sampleCount++;
+
+  // Optional delay to avoid overwhelming the serial output buffer
+  // delay(5);  // ~200Hz
 }
